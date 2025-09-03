@@ -2,10 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Wedding Invitation — Star & Raine</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Google Fonts for wedding style -->
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wedding Invitation</title>
   <style>
     body {
       margin: 0;
@@ -13,144 +11,153 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      font-family: "Playfair Display", serif;
-      color: #fff;
-      background: linear-gradient(to right, #000 0%, #000 50%, #111 50%, #111 100%);
-      overflow: hidden;
+      font-family: 'Georgia', serif;
+      color: white;
       text-align: center;
-    }
-
-    /* starry background right */
-    .stars {
-      position: absolute;
-      right: 0; top: 0; bottom: 0; width: 50%;
-      background: transparent;
-      z-index: 1;
-    }
-    .stars::before {
-      content: "";
-      position: absolute; inset: 0;
-      background-image: radial-gradient(2px 2px at 20px 30px, white 80%, transparent 81%),
-                        radial-gradient(1px 1px at 70px 90px, white 70%, transparent 71%),
-                        radial-gradient(2px 2px at 130px 150px, white 80%, transparent 81%);
-      background-size: 200px 200px;
-      animation: twinkle 6s infinite linear;
-    }
-    @keyframes twinkle { 50% { opacity: 0.5; } }
-
-    /* rain background left */
-    .rain {
-      position: absolute;
-      left: 0; top: 0; bottom: 0; width: 50%;
-      z-index: 1;
+      position: relative;
       overflow: hidden;
+      background: url('manila-cathedral.jpg') no-repeat center center/cover; /* Gamitin yung inupload mong image */
     }
-    .drop {
-      position: absolute;
-      width: 2px; height: 20px;
-      background: rgba(255,255,255,0.4);
-      bottom: 100%;
-      animation: fall linear infinite;
-    }
-    @keyframes fall { to { transform: translateY(120vh); } }
 
-    .invitation {
+    /* Pink overlay */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(255, 192, 203, 0.4); /* Transparent pink */
+      z-index: 1;
+    }
+
+    .content {
       position: relative;
       z-index: 2;
-      padding: 20px;
     }
 
-    .invitation h1 {
+    h1 {
+      font-size: 3rem;
+      margin: 0.5rem 0;
+    }
+
+    h2 {
       font-size: 2rem;
-      margin: 0;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      font-weight: 600;
+      margin: 0.5rem 0;
     }
 
-    .names {
-      font-family: "Great Vibes", cursive;
-      font-size: 4rem;
-      margin: 20px 0;
-    }
-
-    .date-place {
-      font-size: 1rem;
-      margin-top: 15px;
-      letter-spacing: 1px;
-    }
-
-    /* countdown */
-    .countdown {
-      margin-top: 30px;
-      display: flex;
-      justify-content: center;
-      gap: 30px;
-      font-size: 1rem;
-    }
-    .countdown div {
-      text-align: center;
-    }
-    .countdown .num {
-      font-size: 2rem;
-      font-weight: bold;
-      display: block;
-      font-family: "Playfair Display", serif;
+    #starsCanvas, #rainCanvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      display: none; /* hidden by default */
     }
   </style>
 </head>
 <body>
-  <div class="stars"></div>
-  <div class="rain" id="rain"></div>
+  <canvas id="starsCanvas"></canvas>
+  <canvas id="rainCanvas"></canvas>
 
-  <div class="invitation">
+  <div class="content">
     <h1>Wedding Invitation</h1>
-    <div class="names">Star & Raine</div>
-    <div class="date-place">
-      Saturday, November 09, 2025 <br>
-      Manila Cathedral, Minor Basilica and Metropolitan Cathedral of the Immaculate Conception
-    </div>
-    <div class="countdown" id="countdown">
-      <div><span class="num" id="days">0</span>Day</div>
-      <div><span class="num" id="hours">0</span>O'clock</div>
-      <div><span class="num" id="minutes">0</span>Minute</div>
-      <div><span class="num" id="seconds">0</span>Second</div>
-    </div>
+    <h2>Star & Raine</h2>
+    <p>Saturday, November 09, 2025<br>
+    Manila Cathedral, Minor Basilica and Metropolitan Cathedral of the Immaculate Conception</p>
+    <p id="countdown"></p>
   </div>
 
   <script>
-    // rain drops
-    const rain = document.getElementById("rain");
-    for (let i=0; i<70; i++) {
-      const drop = document.createElement("div");
-      drop.className = "drop";
-      drop.style.left = Math.random()*window.innerWidth/2 + "px";
-      drop.style.animationDuration = 0.5 + Math.random()*1.5 + "s";
-      drop.style.animationDelay = Math.random()*2 + "s";
-      rain.appendChild(drop);
+    const starsCanvas = document.getElementById('starsCanvas');
+    const rainCanvas = document.getElementById('rainCanvas');
+    const starsCtx = starsCanvas.getContext('2d');
+    const rainCtx = rainCanvas.getContext('2d');
+    starsCanvas.width = rainCanvas.width = window.innerWidth;
+    starsCanvas.height = rainCanvas.height = window.innerHeight;
+
+    // STAR ANIMATION
+    let stars = [];
+    for (let i = 0; i < 100; i++) {
+      stars.push({
+        x: Math.random() * starsCanvas.width,
+        y: Math.random() * starsCanvas.height,
+        radius: Math.random() * 2,
+        alpha: Math.random(),
+        speed: Math.random() * 0.02
+      });
+    }
+    function drawStars() {
+      starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+      stars.forEach(star => {
+        starsCtx.beginPath();
+        starsCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        starsCtx.fillStyle = `rgba(255,255,255,${star.alpha})`;
+        starsCtx.fill();
+        star.alpha += star.speed;
+        if (star.alpha <= 0 || star.alpha >= 1) star.speed *= -1;
+      });
+      requestAnimationFrame(drawStars);
     }
 
-    // countdown
-    const target = new Date("2025-11-09T00:00:00+08:00").getTime();
-    const daysEl = document.getElementById("days");
-    const hoursEl = document.getElementById("hours");
-    const minutesEl = document.getElementById("minutes");
-    const secondsEl = document.getElementById("seconds");
+    // RAIN ANIMATION
+    let drops = [];
+    for (let i = 0; i < 200; i++) {
+      drops.push({
+        x: Math.random() * rainCanvas.width,
+        y: Math.random() * rainCanvas.height,
+        length: Math.random() * 20 + 10,
+        speed: Math.random() * 4 + 4
+      });
+    }
+    function drawRain() {
+      rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
+      rainCtx.strokeStyle = "rgba(174,194,224,0.5)";
+      rainCtx.lineWidth = 1;
+      drops.forEach(drop => {
+        rainCtx.beginPath();
+        rainCtx.moveTo(drop.x, drop.y);
+        rainCtx.lineTo(drop.x, drop.y + drop.length);
+        rainCtx.stroke();
+        drop.y += drop.speed;
+        if (drop.y > rainCanvas.height) {
+          drop.y = -20;
+          drop.x = Math.random() * rainCanvas.width;
+        }
+      });
+      requestAnimationFrame(drawRain);
+    }
 
-    setInterval(()=>{
-      const now = Date.now();
-      let diff = target - now;
-      if (diff < 0) diff = 0;
-      const sec = Math.floor(diff/1000);
-      const days = Math.floor(sec/86400);
-      const hrs = Math.floor((sec%86400)/3600);
-      const mins = Math.floor((sec%3600)/60);
-      const secs = sec%60;
-      daysEl.textContent = days;
-      hoursEl.textContent = hrs.toString().padStart(2,"0");
-      minutesEl.textContent = mins.toString().padStart(2,"0");
-      secondsEl.textContent = secs.toString().padStart(2,"0");
-    },1000);
+    // TOGGLE EFFECTS
+    let showStars = true;
+    function toggleEffect() {
+      if (showStars) {
+        starsCanvas.style.display = 'block';
+        rainCanvas.style.display = 'none';
+        drawStars();
+      } else {
+        starsCanvas.style.display = 'none';
+        rainCanvas.style.display = 'block';
+        drawRain();
+      }
+      showStars = !showStars;
+    }
+
+    toggleEffect();
+    setInterval(toggleEffect, 5000);
+
+    // COUNTDOWN
+    const eventDate = new Date("Nov 09, 2025 00:00:00").getTime();
+    const timer = document.getElementById("countdown");
+
+    setInterval(function() {
+      const now = new Date().getTime();
+      const distance = eventDate - now;
+      const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+      timer.innerHTML = `${days} Days ${hours} Hours ${minutes} Minutes ${seconds} Seconds`;
+    }, 1000);
   </script>
 </body>
 </html>
