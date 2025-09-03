@@ -5,158 +5,91 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Wedding Invitation</title>
   <style>
+    /* Reset */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
-      margin: 0;
+      font-family: 'Georgia', serif;
       height: 100vh;
       display: flex;
-      justify-content: center;
       align-items: center;
-      font-family: 'Georgia', serif;
-      color: white;
+      justify-content: center;
       text-align: center;
+      color: white;
       position: relative;
       overflow: hidden;
-      background: url('manila-cathedral dark.jpg') no-repeat center center/cover; /* Gamitin yung inupload mong image */
     }
 
-    /* Pink overlay */
+    /* Background image + pink overlay */
     body::before {
       content: "";
       position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(255, 192, 203, 0.4); /* Transparent pink */
-      z-index: 1;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: url('manila-cathedral.jpg') no-repeat center center/cover;
+      z-index: -2;
     }
 
-    .content {
-      position: relative;
-      z-index: 2;
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255, 182, 193, 0.4); /* pink transparent */
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 800px;
+      padding: 20px;
     }
 
     h1 {
       font-size: 3rem;
-      margin: 0.5rem 0;
+      font-family: 'Cursive', serif;
+      margin-bottom: 10px;
     }
 
     h2 {
       font-size: 2rem;
-      margin: 0.5rem 0;
+      font-family: 'Cursive', serif;
+      margin-bottom: 20px;
     }
 
-    #starsCanvas, #rainCanvas {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 0;
-      pointer-events: none;
-      display: none; /* hidden by default */
+    p {
+      font-size: 1.2rem;
+      margin-bottom: 10px;
+    }
+
+    #countdown {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
-  <canvas id="starsCanvas"></canvas>
-  <canvas id="rainCanvas"></canvas>
-
-  <div class="content">
-    <h1>Wedding Invitation</h1>
-    <h2>Star & Raine</h2>
-    <p>Saturday, November 09, 2025<br>
-    Manila Cathedral, Minor Basilica and Metropolitan Cathedral of the Immaculate Conception</p>
-    <p id="countdown"></p>
+  <div class="container">
+    <p>Wedding Invitation</p>
+    <h1>Star & Raine</h1>
+    <p>Saturday, November 09, 2025</p>
+    <p>Manila Cathedral, Minor Basilica and Metropolitan Cathedral of the Immaculate Conception</p>
+    <div id="countdown"></div>
   </div>
 
   <script>
-    const starsCanvas = document.getElementById('starsCanvas');
-    const rainCanvas = document.getElementById('rainCanvas');
-    const starsCtx = starsCanvas.getContext('2d');
-    const rainCtx = rainCanvas.getContext('2d');
-    starsCanvas.width = rainCanvas.width = window.innerWidth;
-    starsCanvas.height = rainCanvas.height = window.innerHeight;
+    // Countdown script
+    const weddingDate = new Date("Nov 9, 2025 00:00:00").getTime();
+    const countdownEl = document.getElementById("countdown");
 
-    // STAR ANIMATION
-    let stars = [];
-    for (let i = 0; i < 100; i++) {
-      stars.push({
-        x: Math.random() * starsCanvas.width,
-        y: Math.random() * starsCanvas.height,
-        radius: Math.random() * 2,
-        alpha: Math.random(),
-        speed: Math.random() * 0.02
-      });
-    }
-    function drawStars() {
-      starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
-      stars.forEach(star => {
-        starsCtx.beginPath();
-        starsCtx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
-        starsCtx.fillStyle = `rgba(255,255,255,${star.alpha})`;
-        starsCtx.fill();
-        star.alpha += star.speed;
-        if (star.alpha <= 0 || star.alpha >= 1) star.speed *= -1;
-      });
-      requestAnimationFrame(drawStars);
-    }
-
-    // RAIN ANIMATION
-    let drops = [];
-    for (let i = 0; i < 200; i++) {
-      drops.push({
-        x: Math.random() * rainCanvas.width,
-        y: Math.random() * rainCanvas.height,
-        length: Math.random() * 20 + 10,
-        speed: Math.random() * 4 + 4
-      });
-    }
-    function drawRain() {
-      rainCtx.clearRect(0, 0, rainCanvas.width, rainCanvas.height);
-      rainCtx.strokeStyle = "rgba(174,194,224,0.5)";
-      rainCtx.lineWidth = 1;
-      drops.forEach(drop => {
-        rainCtx.beginPath();
-        rainCtx.moveTo(drop.x, drop.y);
-        rainCtx.lineTo(drop.x, drop.y + drop.length);
-        rainCtx.stroke();
-        drop.y += drop.speed;
-        if (drop.y > rainCanvas.height) {
-          drop.y = -20;
-          drop.x = Math.random() * rainCanvas.width;
-        }
-      });
-      requestAnimationFrame(drawRain);
-    }
-
-    // TOGGLE EFFECTS
-    let showStars = true;
-    function toggleEffect() {
-      if (showStars) {
-        starsCanvas.style.display = 'block';
-        rainCanvas.style.display = 'none';
-        drawStars();
-      } else {
-        starsCanvas.style.display = 'none';
-        rainCanvas.style.display = 'block';
-        drawRain();
-      }
-      showStars = !showStars;
-    }
-
-    toggleEffect();
-    setInterval(toggleEffect, 5000);
-
-    // COUNTDOWN
-    const eventDate = new Date("Nov 09, 2025 00:00:00").getTime();
-    const timer = document.getElementById("countdown");
-
-    setInterval(function() {
+    setInterval(() => {
       const now = new Date().getTime();
-      const distance = eventDate - now;
+      const distance = weddingDate - now;
+
       const days = Math.floor(distance / (1000 * 60 * 60 * 24));
       const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-      timer.innerHTML = `${days} Days ${hours} Hours ${minutes} Minutes ${seconds} Seconds`;
+      countdownEl.innerHTML = `${days} Days ${hours} Hours ${minutes} Minutes ${seconds} Seconds`;
     }, 1000);
   </script>
 </body>
